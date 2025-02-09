@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.FileUploadMapper">
+    
+    <update id="executeQuery">
+        ${query}
+    </update>
+    
+    <insert id="insertBulkData">
+        /* Bulk insert data */
+        INSERT INTO ${tableName} 
+        (<foreach collection="columns" item="colDef" separator=",">${colDef.name}</foreach>) 
+        VALUES 
+        <foreach collection="dataList" item="data" separator=",">
+            (<foreach collection="columns" item="colDef" separator=",">
+                CAST(#{data.${colDef.name}} AS 
+                <choose>
+                    <when test="colDef.type.toLowerCase().startsWith('varchar') or colDef.type.toLowerCase() == 'text'">TEXT</when>
+                    <when test="colDef.type.toLowerCase() == 'integer'">INTEGER</when>
+                    <when test="colDef.type.toLowerCase() == 'bigint'">BIGINT</when>
+                    <when test="colDef.type.toLowerCase() == 'numeric'">NUMERIC</when>
+                    <when test="colDef.type.toLowerCase() == 'date'">DATE</when>
+                    <when test="colDef.type.toLowerCase() == 'timestamp'">TIMESTAMP</when>
+                    <when test="colDef.type.toLowerCase() == 'boolean'">BOOLEAN</when>
+                    <otherwise>TEXT</otherwise>
+                </choose>)
+            </foreach>)
+        </foreach>
+    </insert>
+    
+    <insert id="insertUploadHistory">
+        INSERT INTO tb_upload_history (
+            file_name,
+            total_rows,
+            success_rows,
+            user_id,
+            upload_dt
+        ) VALUES (
+            #{fileName},
+            #{totalRows},
+            #{successRows},
+            #{userId},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+    
+</mapper> 

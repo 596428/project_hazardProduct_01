@@ -1,0 +1,110 @@
+-- 사용자 테이블
+CREATE TABLE tb_cm_user (
+    user_id serial PRIMARY KEY,
+    user_nm varchar(100) NOT NULL,
+    password varchar(200) NOT NULL,
+    email varchar(100) UNIQUE NOT NULL,
+    role_cd char(2) DEFAULT '02',
+    api_key varchar(100) UNIQUE,
+    last_login_dt timestamp,
+    use_yn char(1) DEFAULT 'Y',
+    reg_dt timestamp DEFAULT CURRENT_TIMESTAMP
+);
+
+-- API 호출 이력
+CREATE TABLE tb_api_call_hist (
+    call_id serial PRIMARY KEY,
+    user_id integer,
+    api_key varchar(100),
+    req_url text,
+    req_param jsonb,
+    res_code varchar(10),
+    call_dt timestamp DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 검색 이력
+CREATE TABLE tb_search_hist (
+    search_id serial PRIMARY KEY,
+    user_id integer,
+    search_keyword text,
+    search_result_cnt integer,
+    search_dt timestamp DEFAULT CURRENT_TIMESTAMP
+);
+
+-- API 호출 이력 테이블 연결
+ALTER TABLE tb_api_call_hist
+ADD CONSTRAINT fk_api_call_user
+FOREIGN KEY (user_id) REFERENCES tb_cm_user(user_id);
+
+-- 검색 이력 테이블 연결
+ALTER TABLE tb_search_hist
+ADD CONSTRAINT fk_search_user
+FOREIGN KEY (user_id) REFERENCES tb_cm_user(user_id);
+
+
+
+-- 검색 인덱스 테이블
+CREATE TABLE tb_opr_search_index (
+    mst_id varchar(20),
+    mst_data_id varchar(10),
+    search_text text,
+    PRIMARY KEY (mst_id, mst_data_id)
+);
+
+--pg_trgm 확장 설치
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- trigram 인덱스 생성
+CREATE INDEX idx_search_text_trgm ON tb_opr_search_index 
+USING gin(search_text gin_trgm_ops);
+
+-- 위해상품 통합 정보 View
+CREATE MATERIALIZED VIEW mv_dng_gds_info AS
+SELECT 
+    d.mst_id,
+    d.mst_data_id,
+    i.insp_inst_nm,
+    d.doc_no,
+    d.doc_cycl,
+    d.cmd_bgng_dd_cn,
+    d.rpt_type_cd,
+    r.rpt_type_nm,
+    d.prdct_nm,
+    d.mnftr_ymd,
+    d.rtl_term_cn,
+    d.rtrvl_rsn_cd,
+    rs.rtrvl_rsn_nm,
+    b.bzenty_type_nm,
+    b.bzenty_nm,
+    p.icpt_insp_artcl_cn,
+    p.icpt_insp_spcfct_cn,
+    p.icpt_insp_rslt_cn,
+    s.search_text
+FROM tb_opr_dng_gds_l d
+JOIN tb_cm_insp_inst i ON d.insp_inst_cd = i.insp_inst_cd
+LEFT JOIN tb_cm_rpt_type r ON d.rpt_type_cd = r.rpt_type_cd
+LEFT JOIN tb_cm_rtrvl_rsn rs ON d.rtrvl_rsn_cd = rs.rtrvl_rsn_cd
+LEFT JOIN tb_opr_bzenty_l b 
+    ON d.insp_inst_cd = b.insp_inst_cd 
+    AND d.doc_no = b.doc_no 
+    AND d.doc_cycl = b.doc_cycl
+LEFT JOIN tb_opr_icpt_insp_l p 
+    ON d.insp_inst_cd = p.insp_inst_cd 
+    AND d.doc_no = p.doc_no 
+    AND d.doc_cycl = p.doc_cycl
+LEFT JOIN tb_opr_search_index s 
+    ON d.mst_id = s.mst_id 
+    AND d.mst_data_id = s.mst_data_id;
+
+-- 인덱스 추가
+CREATE INDEX idx_mv_dng_gds_doc_no 
+ON mv_dng_gds_info(doc_no);
+
+CREATE INDEX idx_mv_dng_gds_bzenty_nm 
+ON mv_dng_gds_info(bzenty_nm);
+
+-- 검색 인덱스 테이블 연결
+ALTER TABLE tb_opr_search_index
+ADD CONSTRAINT fk_search_index_dng_gds
+FOREIGN KEY (mst_id, mst_data_id) 
+REFERENCES tb_opr_dng_gds_l(mst_id, mst_data_id);

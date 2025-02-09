@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>위해상품 목록</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/script.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>위해상품 목록</h1>
+        <div class="header-buttons">
+            <!-- 디버깅용 권한 정보 출력 -->
+            <div style="color: red;">
+                <span th:text="${auth.authorities}"></span>
+            </div>
+            
+            <a href="/test03" class="btn btn-secondary">마이페이지</a>
+            <!-- 권한 체크 - ROLE_01인 경우만 버튼 표시 -->
+            <a href="/test02" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">관리페이지</a>
+            <a href="/test04" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">업로드페이지</a>
+            <a href="/test05" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">API 테스트</a>
+            <button onclick="logout()" class="btn btn-danger">로그아웃</button>
+        </div>
+    </div>
+    
+    <!-- 검색 폼 수정 -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="제품명을 입력하세요...">
+        <button onclick="test01Functions.searchProducts()">검색</button>
+        <button onclick="location.href='/test01'" class="btn-list">전체목록</button>
+        <button onclick="test01Functions.saveChanges()" class="btn-save" sec:authorize="hasAuthority('ROLE_01')">수정</button>
+    </div>
+
+    <table id="goodsTable">
+        <thead>
+            <tr>
+                <th>고시일자</th>
+                <th>검사기관명</th>
+                <th>문서번호</th>
+                <th>문서차수</th>
+                <th>보고유형코드</th>
+                <th>보고유형명</th>
+                <th>제품명</th>
+                <th>유통기한</th>
+                <th>회수사유명</th>
+                <th>업체유형명</th>
+                <th>업체명</th>
+                <th>부적합 검사 항목</th>
+                <th>부적합 검사 규격</th>
+                <th>부적합 검사 결과</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="goods : ${goodsList}">
+                <td th:text="${goods.cmdBgngDdCn != null ? #strings.substring(goods.cmdBgngDdCn,0,4) + '-' + #strings.substring(goods.cmdBgngDdCn,4,6) + '-' + #strings.substring(goods.cmdBgngDdCn,6,8) : ''}">고시일자</td>
+                <td th:text="${goods.inspInstNm}" th:data-id="${goods.mstId}" th:data-data-id="${goods.mstDataId}" th:data-field="insp_inst_nm" th:data-max="200" class="editable">검사기관명</td>
+                <td th:text="${goods.docNo}">문서번호</td>
+                <td th:text="${goods.docCycl}">문서차수</td>
+                <td th:text="${goods.rptTypeCd}" th:data-id="${goods.mstId}" th:data-data-id="${goods.mstDataId}" th:data-field="rpt_type_cd" th:data-max="1" class="editable">보고유형코드</td>
+                <td th:text="${goods.rptTypeNm}" th:data-id="${goods.mstId}" th:data-data-id="${goods.mstDataId}" th:data-field="rpt_type_nm" th:data-max="100" class="editable">보고유형명</td>
+                <td th:text="${goods.prdctNm}" th:data-id="${goods.mstId}" th:data-data-id="${goods.mstDataId}" th:data-field="prdct_nm" th:data-max="200" class="editable">제품명</td>
+                <td th:text="${goods.rtlTermCn != null && goods.rtlTermCn != 'nan' && #strings.length(goods.rtlTermCn) == 8 ? #strings.substring(goods.rtlTermCn,0,4) + '-' + #strings.substring(goods.rtlTermCn,4,6) + '-' + #strings.substring(goods.rtlTermCn,6,8) : ''}">유통기한</td>
+                <td th:text="${goods.rtrvlRsnNm}">회수사유명</td>
+                <td th:text="${goods.bzentyTypeNm}">업체유형명</td>
+                <td th:text="${goods.bzentyNm}">업체명</td>
+                <td th:text="${goods.icptInspArtclCn}">부적합 검사 항목</td>
+                <td th:text="${goods.icptInspSpcfctCn}">부적합 검사 규격</td>
+                <td th:text="${goods.icptInspRsltCn}">부적합 검사 결과</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- 테이블 아래에 추가 -->
+    <div class="pagination" th:if="${totalPages > 0}">
+        <a th:if="${currentPage > 0}" th:href="@{/test01(page=${currentPage - 1}, keyword=${keyword})}">&laquo; 이전</a>
+        <span th:text="${currentPage + 1} + ' / ' + ${totalPages}"></span>
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/test01(page=${currentPage + 1}, keyword=${keyword})}">다음 &raquo;</a>
+    </div>
+
+    <script th:inline="javascript">
+    // 관리자 권한 설정
+    test01Functions.isAdmin = /*[[${#authorization.expression('hasAuthority("ROLE_01")')}]]*/ false;
+    
+    // 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+        test01Functions.init();
+    });
+    </script>
+</body>
+</html> 

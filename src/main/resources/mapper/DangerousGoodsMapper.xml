@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.DangerousGoodsMapper">
+    
+    <sql id="searchCondition">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    d.prdct_nm LIKE CONCAT('%', #{keyword}, '%') OR
+                    d.prdct_type_nm LIKE CONCAT('%', #{keyword}, '%') OR
+                    s.search_text LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="inspInstCd != null and inspInstCd != ''">
+                AND d.insp_inst_cd = #{inspInstCd}
+            </if>
+            <if test="rptTypeCd != null and rptTypeCd != ''">
+                AND d.rpt_type_cd = #{rptTypeCd}
+            </if>
+            <if test="rtrvlRsnCd != null and rtrvlRsnCd != ''">
+                AND d.rtrvl_rsn_cd = #{rtrvlRsnCd}
+            </if>
+        </where>
+    </sql>
+
+    <select id="searchDangerousGoods" resultType="DangerousGoods">
+        SELECT 
+            mst_id,
+            mst_data_id,
+            cmd_bgng_dd_cn,
+            insp_inst_nm,
+            doc_no,
+            doc_cycl,
+            rpt_type_cd,
+            rpt_type_nm,
+            prdct_nm,
+            rtl_term_cn,
+            rtrvl_rsn_nm,
+            bzenty_type_nm,
+            bzenty_nm,
+            icpt_insp_artcl_cn,
+            icpt_insp_spcfct_cn,
+            icpt_insp_rslt_cn
+        FROM mv_dng_gds_info
+        WHERE prdct_nm LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY cmd_bgng_dd_cn DESC, rpt_type_cd ASC
+        LIMIT #{size} OFFSET #{page} * #{size}
+    </select>
+
+    <select id="countDangerousGoods" resultType="int">
+        SELECT COUNT(*)
+        FROM mv_dng_gds_info
+        WHERE prdct_nm LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
+    <select id="getPaginatedGoods" resultType="DangerousGoods">
+        SELECT 
+            mst_id,
+            mst_data_id,
+            cmd_bgng_dd_cn,
+            insp_inst_nm,
+            doc_no,
+            doc_cycl,
+            rpt_type_cd,
+            rpt_type_nm,
+            prdct_nm,
+            rtl_term_cn,
+            rtrvl_rsn_nm,
+            bzenty_type_nm,
+            bzenty_nm,
+            icpt_insp_artcl_cn,
+            icpt_insp_spcfct_cn,
+            icpt_insp_rslt_cn
+        FROM mv_dng_gds_info
+        ORDER BY cmd_bgng_dd_cn DESC, rpt_type_cd ASC
+        LIMIT #{size} OFFSET #{page} * #{size}
+    </select>
+
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*)
+        FROM mv_dng_gds_info
+    </select>
+
+    <select id="checkData" resultType="String">
+        SELECT DISTINCT use_yn 
+        FROM tb_opr_dng_gds_l
+    </select>
+
+    <update id="updateField" parameterType="map">
+        UPDATE tb_opr_dng_gds_l
+        SET ${field} = #{value}
+        WHERE mst_id = #{id} AND mst_data_id = #{dataId}
+    </update>
+
+    <update id="refreshView">
+        REFRESH MATERIALIZED VIEW mv_dng_gds_info
+    </update>
+</mapper> 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.AdminMapper">
+    <select id="getUsersWithApiKeys" resultType="map">
+        SELECT 
+            u.user_id,
+            u.user_nm,
+            u.email,
+            u.role_cd,
+            u.use_yn as user_status,
+            ak.purpose,
+            ak.api_key,
+            ak.expires_dt,
+            ak.use_yn as api_status
+        FROM 
+            tb_cm_user u
+            LEFT JOIN tb_cm_api_key ak ON u.user_id = ak.user_id
+        ORDER BY 
+            u.user_id, ak.issued_dt DESC
+    </select>
+    
+    <update id="updateUserRole">
+        UPDATE tb_cm_user 
+        SET role_cd = #{roleCd}
+        WHERE user_id = #{userId}
+    </update>
+    
+    <update id="updateApiKeyExpiry">
+        UPDATE tb_cm_api_key 
+        SET expires_dt = #{expiryDate}::timestamp
+        WHERE api_key = #{apiKey}
+    </update>
+</mapper> 

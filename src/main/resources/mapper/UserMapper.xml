@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.UserMapper">
+    <select id="existsByEmail" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM tb_cm_user 
+            WHERE email = #{email}
+        )
+    </select>
+    
+    <insert id="insertUser">
+        INSERT INTO tb_cm_user (
+            user_nm, 
+            email, 
+            password, 
+            role_cd
+        ) VALUES (
+            #{userName},
+            #{email},
+            #{password},
+            '02'
+        )
+    </insert>
+    
+    <resultMap id="UserMap" type="User">
+        <id column="user_id" property="userId"/>
+        <result column="user_nm" property="userName"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="role_cd" property="roleCd"/>
+        <result column="last_login_dt" property="lastLoginDt"/>
+        <result column="use_yn" property="useYn"/>
+        <result column="reg_dt" property="regDt"/>
+    </resultMap>
+    
+    <select id="findByEmail" resultMap="UserMap">
+        SELECT 
+            user_id,
+            user_nm,
+            email,
+            password,
+            role_cd,
+            last_login_dt,
+            use_yn,
+            reg_dt
+        FROM tb_cm_user 
+        WHERE email = #{email}
+    </select>
+    
+    <update id="updateLastLoginTime">
+        UPDATE tb_cm_user 
+        SET last_login_dt = CURRENT_TIMESTAMP 
+        WHERE user_id = #{userId}
+    </update>
+    
+    <select id="findUserIdByUserName" resultType="Integer">
+        SELECT user_id 
+        FROM tb_cm_user 
+        WHERE user_name = #{userName}
+    </select>
+</mapper> 

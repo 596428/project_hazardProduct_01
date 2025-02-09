@@ -1,0 +1,84 @@
+--0. 업체기관명, 업체검사내역 테이블 복사
+CREATE TABLE tb_opr_bzenty_l AS 
+SELECT * FROM tb_dng_gds_bzenty_l;
+
+CREATE TABLE tb_opr_icpt_insp_l AS 
+SELECT * FROM tb_dng_gds_icpt_insp_l;
+
+-- 1. 간소화된 검사기관 코드 테이블
+CREATE TABLE tb_cm_insp_inst (
+    insp_inst_cd varchar(2) PRIMARY KEY,
+    insp_inst_nm varchar(200) NOT NULL,
+    use_yn char(1) DEFAULT 'Y'
+);
+
+-- 2. 간소화된 보고유형 코드 테이블
+CREATE TABLE tb_cm_rpt_type (
+    rpt_type_cd varchar(1) PRIMARY KEY,
+    rpt_type_nm varchar(100) NOT NULL,
+    use_yn char(1) DEFAULT 'Y'
+);
+
+-- 1. 회수사유 코드 테이블
+CREATE TABLE tb_cm_rtrvl_rsn (
+    rtrvl_rsn_cd varchar(1) PRIMARY KEY,
+    rtrvl_rsn_nm varchar(100) NOT NULL,
+    use_yn char(1) DEFAULT 'Y'
+);
+
+-- 2. 초기 데이터 이관
+INSERT INTO tb_cm_insp_inst (insp_inst_cd, insp_inst_nm)
+SELECT DISTINCT insp_inst_cd, insp_inst_nm 
+FROM tb_opr_dng_gds_l;
+
+INSERT INTO tb_cm_rpt_type (rpt_type_cd, rpt_type_nm)
+SELECT DISTINCT rpt_type_cd, rpt_type_nm 
+FROM tb_opr_dng_gds_l
+WHERE rpt_type_cd IS NOT NULL;
+
+INSERT INTO tb_cm_rtrvl_rsn (rtrvl_rsn_cd, rtrvl_rsn_nm)
+SELECT DISTINCT rtrvl_rsn_cd, rtrvl_rsn_nm 
+FROM tb_opr_dng_gds_l
+WHERE rtrvl_rsn_cd IS NOT NULL;
+
+-- 운영 테이블 간 관계 설정
+
+--tb_opr_dng_gds_l 테이블 unique 설정
+ALTER TABLE tb_opr_dng_gds_l
+ADD CONSTRAINT tb_opr_dng_gds_l_uk 
+UNIQUE (insp_inst_cd, doc_no, doc_cycl);
+
+ALTER TABLE tb_opr_bzenty_l
+ADD CONSTRAINT fk_opr_bzenty_dng_gds 
+FOREIGN KEY (insp_inst_cd, doc_no, doc_cycl) 
+REFERENCES tb_opr_dng_gds_l(insp_inst_cd, doc_no, doc_cycl);
+
+ALTER TABLE tb_opr_icpt_insp_l
+ADD CONSTRAINT fk_opr_icpt_insp_dng_gds 
+FOREIGN KEY (insp_inst_cd, doc_no, doc_cycl) 
+REFERENCES tb_opr_dng_gds_l(insp_inst_cd, doc_no, doc_cycl);
+
+ALTER TABLE tb_opr_dng_gds_l
+ADD CONSTRAINT fk_opr_dng_gds_insp_inst 
+FOREIGN KEY (insp_inst_cd) 
+REFERENCES tb_cm_insp_inst(insp_inst_cd);
+
+ALTER TABLE tb_opr_dng_gds_l
+ADD CONSTRAINT fk_opr_dng_gds_rpt_type 
+FOREIGN KEY (rpt_type_cd) 
+REFERENCES tb_cm_rpt_type(rpt_type_cd);
+
+ALTER TABLE tb_opr_dng_gds_l
+ADD CONSTRAINT fk_opr_dng_gds_rtrvl_rsn 
+FOREIGN KEY (rtrvl_rsn_cd) 
+REFERENCES tb_cm_rtrvl_rsn(rtrvl_rsn_cd);
+
+
+-- 데이터 확인용 쿼리
+SELECT rpt_type_cd, rpt_type_nm, COUNT(*)
+FROM tb_opr_dng_gds_l
+WHERE rpt_type_cd IS NOT NULL
+GROUP BY rpt_type_cd, rpt_type_nm
+ORDER BY rpt_type_cd;
+
+

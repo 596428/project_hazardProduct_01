@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ApiServiceMapper">
+    <!-- SQL 쿼리들은 여기에 추가될 예정 -->
+    
+    <select id="isValidApiKey" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 
+            FROM tb_cm_api_key 
+            WHERE api_key = #{apiKey}
+            AND use_yn = 'Y'
+            AND expires_dt > CURRENT_TIMESTAMP
+        )
+    </select>
+    
+    <select id="getApiKeyId" resultType="Integer">
+        SELECT api_key_id 
+        FROM tb_cm_api_key 
+        WHERE api_key = #{apiKey}
+    </select>
+    
+    <insert id="insertCallHistory" parameterType="com.example.dto.api.ApiServiceDto$CallHistory">
+        INSERT INTO tb_api_call_hist (
+            api_key_id,
+            req_url,
+            req_param,
+            res_code,
+            call_dt
+        ) VALUES (
+            #{apiKeyId},
+            #{reqUrl},
+            #{reqParam}::jsonb,
+            #{resCode},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+    
+    <select id="getAllResCodes" resultType="com.example.dto.api.ApiServiceDto$CodeData">
+        SELECT 
+            res_code as resCode,
+            message
+        FROM 
+            tb_cm_res_code
+        ORDER BY 
+            res_code
+    </select>
+    
+    <select id="getResCode" resultType="com.example.dto.api.ApiServiceDto$CodeData">
+        SELECT 
+            res_code as resCode,
+            message
+        FROM 
+            tb_cm_res_code
+        WHERE 
+            res_code = #{resCode}
+    </select>
+    
+    <select id="searchDangerousGoodsByDate" resultType="com.example.dto.api.ApiServiceDto$DangerousGoodsInfo">
+        SELECT 
+            insp_inst_nm as inspInstNm,
+            doc_no as docNo,
+            doc_cycl as docCycl,
+            rpt_type_cd as rptTypeCd,
+            rpt_type_nm as rptTypeNm,
+            prdct_nm as prdctNm,
+            mnftr_ymd as mnftrYmd,
+            rtl_term_cn as rtlTermCn,
+            rtrvl_rsn_cd as rtrvlRsnCd,
+            cmd_bgng_dd_cn as cmdBgngDdCn
+        FROM 
+            mv_dng_gds_info
+        WHERE 
+            TO_DATE(SUBSTRING(cmd_bgng_dd_cn, 1, 8), 'YYYYMMDD') BETWEEN #{startDate} AND #{endDate}
+        ORDER BY 
+            cmd_bgng_dd_cn DESC
+    </select>
+    
+    <select id="searchDangerousGoodsByProduct" resultType="com.example.dto.api.ApiServiceDto$DangerousGoodsInfo">
+        SELECT 
+            insp_inst_nm as inspInstNm,
+            doc_no as docNo,
+            doc_cycl as docCycl,
+            rpt_type_cd as rptTypeCd,
+            rpt_type_nm as rptTypeNm,
+            prdct_nm as prdctNm,
+            bzenty_nm as bzentyNm,
+            mnftr_ymd as mnftrYmd,
+            rtl_term_cn as rtlTermCn,
+            rtrvl_rsn_cd as rtrvlRsnCd,
+            cmd_bgng_dd_cn as cmdBgngDdCn
+        FROM 
+            mv_dng_gds_info
+        WHERE 
+            1=1
+            <if test="productName != null and productName != ''">
+            AND prdct_nm LIKE '%' || #{productName} || '%'
+            </if>
+            <if test="companyName != null and companyName != ''">
+            AND bzenty_nm LIKE '%' || #{companyName} || '%'
+            </if>
+        ORDER BY 
+            cmd_bgng_dd_cn DESC
+    </select>
+</mapper> 

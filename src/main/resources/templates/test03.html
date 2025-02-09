@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/script.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>마이페이지</h1>
+        <div class="header-buttons">
+            <a href="/test01" class="btn btn-secondary">메인으로</a>
+            <button onclick="myPageFunctions.logout()" class="btn btn-danger">로그아웃</button>
+        </div>
+    </div>
+
+    <div class="user-info">
+        <h2>사용자 정보</h2>
+        <div class="info-item">
+            <label>이름:</label>
+            <span th:text="${user.userName}"></span>
+        </div>
+        <div class="info-item">
+            <label>이메일:</label>
+            <span th:text="${user.email}"></span>
+        </div>
+    </div>
+
+    <div class="api-keys">
+        <h2>User API Keys</h2>
+        <button onclick="myPageFunctions.createNewKey()" class="btn-primary">Create New Key</button>
+        <table id="apiKeysTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>API Key</th>
+                    <th>생성일</th>
+                    <th>만료일</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- API 키 목록이 여기에 표시될 것입니다 -->
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+    .status-active { color: green; font-weight: bold; }
+    .status-expired { color: red; font-weight: bold; }
+    .status-pending { color: orange; font-weight: bold; }
+    </style>
+</body>
+</html> 

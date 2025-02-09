@@ -1,0 +1,223 @@
+CREATE TABLE tb_dng_gds_m
+(
+    insp_inst_cd varchar(2) NOT NULL,
+    doc_no varchar(100) NOT NULL,
+    doc_cycl varchar(2) NOT NULL,
+    insp_inst_nm varchar(200) NOT NULL,
+    ntfctn_rtrcn_yn varchar(1) NULL,
+    rpt_type_cd varchar(1) NULL,
+    rpt_type_nm varchar(100) NULL,
+    prdct_nm varchar(200) NULL,
+    prdct_type_nm varchar(100) NULL,
+    plor_nm varchar(100) NULL,
+    barcd_no varchar(30) NULL,
+    mnftr_ymd bpchar(8) NULL,
+    rtl_term_cn varchar(100) NULL,
+    pac_unit_cn varchar(100) NULL,
+    safe_cert_no varchar(50) NULL,
+    prdct_prmsn_no varchar(50) NULL,
+    mnftr_no varchar(50) NULL,
+    rtrvl_rsn_cd varchar(1) NULL,
+    rtrvl_rsn_nm varchar(100) NULL,
+    rpt_inst_nm varchar(100) NULL,
+    rpt_pic_nm varchar(50) NULL,
+    rpt_pic_telno varchar(20) NULL,
+    insp_se_nm varchar(100) NULL,
+    clt_inst_nm varchar(100) NULL,
+    clt_ymd bpchar(8) NULL,
+    rmrk_cn varchar(500) NULL,
+    rpt_ymd varchar(100) NULL,
+    ntfctn_dt timestamp NULL,
+    cmd_bgng_dd_cn varchar(300) NULL,
+    cert_nm varchar(256) NULL,
+    cert_cd_cn varchar(300) NULL,
+    std_gds_clsf_cd varchar(8) NULL,
+    CONSTRAINT tb_dng_gds_m_pk PRIMARY KEY (insp_inst_cd, doc_no, doc_cycl)
+);
+COMMENT ON TABLE tb_dng_gds_m IS 'TB_위해상품기본';
+COMMENT ON COLUMN tb_dng_gds_m.insp_inst_cd IS '검사기관코드';
+COMMENT ON COLUMN tb_dng_gds_m.doc_no IS '문서번호';
+COMMENT ON COLUMN tb_dng_gds_m.doc_cycl IS '문서차수';
+COMMENT ON COLUMN tb_dng_gds_m.insp_inst_nm IS '검사기관명';
+COMMENT ON COLUMN tb_dng_gds_m.ntfctn_rtrcn_yn IS '통보취소여부';
+COMMENT ON COLUMN tb_dng_gds_m.rpt_type_cd IS '보고유형코드';
+COMMENT ON COLUMN tb_dng_gds_m.rpt_type_nm IS '보고유형명';
+COMMENT ON COLUMN tb_dng_gds_m.prdct_nm IS '제품명';
+COMMENT ON COLUMN tb_dng_gds_m.prdct_type_nm IS '제품유형명';
+COMMENT ON COLUMN tb_dng_gds_m.plor_nm IS '원산지명';
+COMMENT ON COLUMN tb_dng_gds_m.barcd_no IS '바코드번호';
+COMMENT ON COLUMN tb_dng_gds_m.mnftr_ymd IS '제조일자';
+COMMENT ON COLUMN tb_dng_gds_m.rtl_term_cn IS '유통기한내용';
+COMMENT ON COLUMN tb_dng_gds_m.pac_unit_cn IS '포장단위내용';
+COMMENT ON COLUMN tb_dng_gds_m.safe_cert_no IS '안전인증번호';
+COMMENT ON COLUMN tb_dng_gds_m.prdct_prmsn_no IS '제품허가번호';
+COMMENT ON COLUMN tb_dng_gds_m.mnftr_no IS '제조번호';
+COMMENT ON COLUMN tb_dng_gds_m.rtrvl_rsn_cd IS '회수사유코드';
+COMMENT ON COLUMN tb_dng_gds_m.rtrvl_rsn_nm IS '회수사유명';
+COMMENT ON COLUMN tb_dng_gds_m.rpt_inst_nm IS '보고기관명';
+COMMENT ON COLUMN tb_dng_gds_m.rpt_pic_nm IS '보고담당자명';
+COMMENT ON COLUMN tb_dng_gds_m.rpt_pic_telno IS '보고담당자전화번호';
+COMMENT ON COLUMN tb_dng_gds_m.insp_se_nm IS '검사구분명';
+COMMENT ON COLUMN tb_dng_gds_m.clt_inst_nm IS '수거기관명';
+COMMENT ON COLUMN tb_dng_gds_m.clt_ymd IS '수거일자';
+COMMENT ON COLUMN tb_dng_gds_m.rmrk_cn IS '비고내용';
+COMMENT ON COLUMN tb_dng_gds_m.rpt_ymd IS '보고일자';
+COMMENT ON COLUMN tb_dng_gds_m.ntfctn_dt IS '통보일시';
+COMMENT ON COLUMN tb_dng_gds_m.cmd_bgng_dd_cn IS '명령시작일내용';
+COMMENT ON COLUMN tb_dng_gds_m.cert_nm IS '인증명';
+COMMENT ON COLUMN tb_dng_gds_m.cert_cd_cn IS '인증코드내용';
+COMMENT ON COLUMN tb_dng_gds_m.std_gds_clsf_cd IS '표준상품분류코드';
+
+
+create table tb_dng_gds_bzenty_l
+(
+insp_inst_cd	 varchar(2),
+doc_no			 varchar(100),
+doc_cycl		 varchar(2),
+bzenty_sn		 varchar(2),
+bzenty_type_nm	 varchar(100),
+bzenty_brno		 bpchar(10),
+bzenty_nm		 varchar(100),
+bzenty_telno	 varchar(20),
+bzenty_zip		 bpchar(6),
+bzenty_addr		 varchar(200),
+bzenty_daddr	 varchar(200),
+CONSTRAINT TB_DNG_GDS_BZENTY_L_PK PRIMARY KEY (insp_inst_cd,doc_no,doc_cycl,bzenty_sn)
+)
+;
+COMMENT ON TABLE tb_dng_gds_bzenty_l IS 'TB_위해상품업체내역';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.insp_inst_cd IS '검사기관코드';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.doc_no IS '문서번호';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.doc_cycl IS '문서차수';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_sn IS '업체일련번호';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_type_nm IS '업체유형명';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_brno IS '업체사업자등록번호';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_nm IS '업체명';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_telno IS '업체전화번호';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_zip IS '업체우편번호';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_addr IS '업체주소';
+COMMENT ON COLUMN tb_dng_gds_bzenty_l.bzenty_daddr IS '업체상세주소';
+
+
+create table tb_dng_gds_icpt_insp_l
+(
+insp_inst_cd			 varchar(2),
+doc_no					 varchar(100),
+doc_cycl				 varchar(2),
+icpt_insp_sn			 varchar(2),
+icpt_insp_artcl_cn		 varchar(100),
+icpt_insp_spcfct_cn		 varchar(200),
+icpt_insp_rslt_cn		 varchar(200),
+CONSTRAINT TB_DNG_GDS_ICPT_INSP_L_PK PRIMARY KEY (insp_inst_cd,doc_no,doc_cycl,icpt_insp_sn)
+)
+;
+COMMENT ON TABLE tb_dng_gds_icpt_insp_l IS 'TB_위해상품부적합검사내역';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.insp_inst_cd IS '검사기관코드';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.doc_no IS '문서번호';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.doc_cycl IS '문서차수';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.icpt_insp_sn IS '부적합검사일련번호';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.icpt_insp_artcl_cn IS '부적합검사항목내용';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.icpt_insp_spcfct_cn IS '부적합검사규격내용';
+COMMENT ON COLUMN tb_dng_gds_icpt_insp_l.icpt_insp_rslt_cn IS '부적합검사결과내용';
+
+-- tb_dng_gds_bzenty_l에 외래키 제약조건 추가
+ALTER TABLE tb_dng_gds_bzenty_l
+ADD CONSTRAINT fk_dng_gds_bzenty_l_m 
+FOREIGN KEY (insp_inst_cd, doc_no, doc_cycl)
+REFERENCES tb_dng_gds_m (insp_inst_cd, doc_no, doc_cycl)
+ON DELETE CASCADE;  -- 마스터 데이터 삭제시 상세 데이터도 삭제
+
+-- tb_dng_gds_icpt_insp_l에 외래키 제약조건 추가
+ALTER TABLE tb_dng_gds_icpt_insp_l
+ADD CONSTRAINT fk_dng_gds_icpt_insp_l_m 
+FOREIGN KEY (insp_inst_cd, doc_no, doc_cycl)
+REFERENCES tb_dng_gds_m (insp_inst_cd, doc_no, doc_cycl)
+ON DELETE CASCADE;  -- 마스터 데이터 삭제시 상세 데이터도 삭제
+
+
+CREATE TABLE tb_opr_dng_gds_l (
+    mst_id varchar(20) NOT NULL,
+    mst_data_id varchar(10) NOT NULL,
+    mst_use_yn varchar(1) NOT NULL,
+    reg_id varchar(15) NOT NULL,
+    reg_dt timestamp NULL,
+    mod_id varchar(15) NULL,
+    mod_dt timestamp NULL,
+    insp_inst_cd varchar(2) NOT NULL,
+    doc_no varchar(100) NOT NULL,
+    doc_cycl varchar(2) NOT NULL,
+    insp_inst_nm varchar(200) NOT NULL,
+    ntfctn_rtrcn_yn varchar(1) NULL,
+    rpt_type_cd varchar(1) NULL,
+    rpt_type_nm varchar(100) NULL,
+    prdct_nm varchar(200) NULL,
+    prdct_type_nm varchar(100) NULL,
+    plor_nm varchar(100) NULL,
+    barcd_no varchar(30) NULL,
+    mnftr_ymd bpchar(8) NULL,
+    rtl_term_cn varchar(100) NULL,
+    pac_unit_cn varchar(100) NULL,
+    safe_cert_no varchar(50) NULL,
+    prdct_prmsn_no varchar(50) NULL,
+    mnftr_no varchar(50) NULL,
+    rtrvl_rsn_cd varchar(1) NULL,
+    rtrvl_rsn_nm varchar(100) NULL,
+    rpt_inst_nm varchar(100) NULL,
+    rpt_pic_nm varchar(50) NULL,
+    rpt_pic_telno varchar(20) NULL,
+    insp_se_nm varchar(100) NULL,
+    clt_inst_nm varchar(100) NULL,
+    clt_ymd bpchar(8) NULL,
+    rmrk_cn varchar(500) NULL,
+    rpt_ymd varchar(100) NULL,
+    ntfctn_dt timestamp NULL,
+    cmd_bgng_dd_cn varchar(300) NULL,
+    cert_nm varchar(256) NULL,
+    cert_cd_cn varchar(300) NULL,
+    std_gds_clsf_cd varchar(8) NULL,
+    use_yn bpchar(1) NULL,
+    CONSTRAINT tb_opr_dng_gds_l_pk PRIMARY KEY (mst_id, mst_data_id)
+);
+-- 테이블 주석
+COMMENT ON TABLE tb_opr_dng_gds_l IS 'TB_OPR_위해상품내역';
+-- 컬럼 주석
+COMMENT ON COLUMN tb_opr_dng_gds_l.mst_id IS '마스터아이디';
+COMMENT ON COLUMN tb_opr_dng_gds_l.mst_data_id IS '마스터데이터아이디';
+COMMENT ON COLUMN tb_opr_dng_gds_l.mst_use_yn IS '마스터사용여부';
+COMMENT ON COLUMN tb_opr_dng_gds_l.reg_id IS '등록아이디';
+COMMENT ON COLUMN tb_opr_dng_gds_l.reg_dt IS '등록일시';
+COMMENT ON COLUMN tb_opr_dng_gds_l.mod_id IS '변경아이디';
+COMMENT ON COLUMN tb_opr_dng_gds_l.mod_dt IS '변경일시';
+COMMENT ON COLUMN tb_opr_dng_gds_l.insp_inst_cd IS '검사기관코드';
+COMMENT ON COLUMN tb_opr_dng_gds_l.doc_no IS '문서번호';
+COMMENT ON COLUMN tb_opr_dng_gds_l.doc_cycl IS '문서차수';
+COMMENT ON COLUMN tb_opr_dng_gds_l.insp_inst_nm IS '검사기관명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.ntfctn_rtrcn_yn IS '통보취소여부';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rpt_type_cd IS '보고유형코드';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rpt_type_nm IS '보고유형명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.prdct_nm IS '제품명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.prdct_type_nm IS '제품유형명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.plor_nm IS '원산지명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.barcd_no IS '바코드번호';
+COMMENT ON COLUMN tb_opr_dng_gds_l.mnftr_ymd IS '제조일자';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rtl_term_cn IS '유통기한내용';
+COMMENT ON COLUMN tb_opr_dng_gds_l.pac_unit_cn IS '포장단위내용';
+COMMENT ON COLUMN tb_opr_dng_gds_l.safe_cert_no IS '안전인증번호';
+COMMENT ON COLUMN tb_opr_dng_gds_l.prdct_prmsn_no IS '제품허가번호';
+COMMENT ON COLUMN tb_opr_dng_gds_l.mnftr_no IS '제조번호';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rtrvl_rsn_cd IS '회수사유코드';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rtrvl_rsn_nm IS '회수사유명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rpt_inst_nm IS '보고기관명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rpt_pic_nm IS '보고담당자명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rpt_pic_telno IS '보고담당자전화번호';
+COMMENT ON COLUMN tb_opr_dng_gds_l.insp_se_nm IS '검사구분명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.clt_inst_nm IS '수거기관명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.clt_ymd IS '수거일자';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rmrk_cn IS '비고내용';
+COMMENT ON COLUMN tb_opr_dng_gds_l.rpt_ymd IS '보고일자';
+COMMENT ON COLUMN tb_opr_dng_gds_l.ntfctn_dt IS '통보일시';
+COMMENT ON COLUMN tb_opr_dng_gds_l.cmd_bgng_dd_cn IS '명령시작일내용';
+COMMENT ON COLUMN tb_opr_dng_gds_l.cert_nm IS '인증명';
+COMMENT ON COLUMN tb_opr_dng_gds_l.cert_cd_cn IS '인증코드내용';
+COMMENT ON COLUMN tb_opr_dng_gds_l.std_gds_clsf_cd IS '표준상품분류코드';
+COMMENT ON COLUMN tb_opr_dng_gds_l.use_yn IS '사용여부';

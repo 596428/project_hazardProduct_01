@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>데이터 업로드</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/script.js"></script>
+</head>
+<body>
+    <!-- 관리자 권한 체크 -->
+    <div sec:authorize="!hasAuthority('ROLE_01')">
+        <script>
+            window.location.href = '/test01';
+        </script>
+    </div>
+
+    <div class="header">
+        <h1>데이터 업로드</h1>
+        <div class="header-buttons">
+            <a href="/test01" class="btn btn-secondary">메인으로</a>
+            <button onclick="commonFunctions.logout()" class="btn btn-danger">로그아웃</button>
+        </div>
+    </div>
+
+    <div class="upload-container">
+        <div class="upload-section">
+            <h2>파일 업로드</h2>
+            <div class="file-upload">
+                <input type="file" id="excelFile" accept=".xlsx,.xls">
+                <input type="number" id="previewRows" value="10" min="1" max="100">
+                <button onclick="uploadFunctions.previewFile()">미리보기</button>
+            </div>
+        </div>
+
+        <div class="preview-section" style="display: none;">
+            <h2>미리보기</h2>
+            <div class="table-info">
+                <input type="text" id="tableName" placeholder="테이블 이름 입력">
+                <div id="columnDefinitions">
+                    <!-- 컬럼 정의는 JavaScript로 동적 생성 -->
+                </div>
+                <button onclick="uploadFunctions.addColumnDefinition()">컬럼 추가</button>
+            </div>
+            
+            <div class="data-range">
+                <label>데이터 범위:</label>
+                <input type="number" id="startRow" placeholder="시작 행">
+                <input type="number" id="endRow" placeholder="끝 행">
+                <span id="totalRows"></span>
+            </div>
+
+            <div class="preview-table">
+                <table id="previewTable">
+                    <thead>
+                        <!-- 헤더는 JavaScript로 동적 생성 -->
+                    </thead>
+                    <tbody>
+                        <!-- 데이터는 JavaScript로 동적 생성 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button onclick="uploadFunctions.startImport()" class="btn-import">데이터 이관 시작</button>
+        </div>
+    </div>
+</body>
+</html> 
