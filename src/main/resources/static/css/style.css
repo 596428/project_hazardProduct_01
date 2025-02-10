@@ -1,60 +1,60 @@
 .container {
-    width: 300px;
+    width: 400px;
     margin: 100px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--dark-bg-color);
+    text-align: center;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: var(--text-color);
 }
 
 .form-group input {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
+    padding: 12px;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
+    background-color: var(--dark-input-bg);
+    color: var(--text-color);
+    box-sizing: border-box;
 }
 
 .btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 10px;
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: var(--dark-btn-primary-bg);
     color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
+    margin-bottom: 15px;
 }
 
 .btn-secondary {
-    background-color: #6c757d;
+    background-color: var(--dark-btn-secondary-bg);
     color: white;
-    margin-top: 10px;
 }
 
 .error-message {
     color: #dc3545;
-    font-size: 0.8em;
+    font-size: 0.9em;
     margin-top: 5px;
-    display: block;
+    text-align: left;
 }
 
 .btn:disabled {
@@ -180,6 +180,7 @@ tr:hover {
     display: flex;
     gap: 10px;
     align-items: center;
+    white-space: nowrap;  /* 버튼 텍스트 줄바꿈 방지 */
 }
 
 /* 헤더 버튼 공통 스타일 */
@@ -192,16 +193,23 @@ tr:hover {
     text-decoration: none;
     display: inline-block;
     color: white;
+    min-width: fit-content;  /* 버튼 최소 너비 설정 */
+    white-space: nowrap;     /* 버튼 텍스트 줄바꿈 방지 */
 }
 
-/* 헤더 버튼 타입별 스타일 */
-/* .header-buttons .btn-secondary {
-    background-color: var(--btn-secondary-bg);
-} */
+/* 헤더의 버튼들 크기 통일 */
+.header-buttons .btn {
+    width: auto;         /* 기존 100% 너비 제거 */
+    margin-bottom: 0;    /* 기존 마진 제거 */
+    font-size: 14px;     /* 폰트 크기 조정 */
+}
 
-/* .header-buttons .btn-danger {
-    background-color: var(--btn-danger-bg);
-} */
+/* 헤더 제목 스타일 */
+.header h1 {
+    color: var(--text-color);
+    margin: 0;
+    white-space: nowrap;  /* 제목 줄바꿈 방지 */
+}
 
 /* 권한 표시 스타일 */
 .header [role="01"] {
@@ -396,16 +404,11 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 20px;
 }
 
-.header h1 {
-    color: var(--text-color);
-    margin: 0;
-}
-
 /* 페이지 제목 스타일 */
 .container h2 {
+    margin-bottom: 30px;
     color: var(--text-color);
     text-align: center;
-    margin-bottom: 30px;
 }
 
 /* 섹션 제목 스타일 */
@@ -857,4 +860,20 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-start-migration:hover {
     background-color: var(--btn-primary-hover);
+}
+
+/* 버튼 호버 효과 */
+.btn-primary:hover {
+    background-color: #3a7abd;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* 입력 필드 포커스 효과 */
+.form-group input:focus {
+    outline: none;
+    border-color: var(--dark-btn-primary-bg);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
