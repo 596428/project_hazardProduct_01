@@ -38,10 +38,12 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/signup", "/css/**", "/js/**").permitAll()
                 .requestMatchers("/test02", "/test04").hasAuthority("ROLE_01")  // test05 -> test04
                 .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()  // POST 요청 명시적 허용
+                .requestMatchers("/api/users/signup").permitAll()  // 회원가입 API는 인증 없이 접근 가능
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form
-                .disable()  // 기본 로그인 비활성화
+            .formLogin(login -> login
+                .loginPage("/login")
+                .permitAll()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)  // 세션 생성 정책 변경

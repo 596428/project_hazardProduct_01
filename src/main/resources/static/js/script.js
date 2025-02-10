@@ -124,40 +124,95 @@ const signupFunctions = {
         document.getElementById('submitBtn').disabled = !(isEmailValid && isPasswordValid && hasPassword);
     },
 
+    signup(event) {
+        event.preventDefault();
+        
+        if (!this.validateEmail() || !this.validatePassword()) {
+            return;
+        }
+
+        const formData = {
+            userName: document.querySelector('input[name="userName"]').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
+
+        console.log('Sending signup request:', formData); // 디버깅용
+
+        fetch('/api/users/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            console.log('Server response:', response); // 디버깅용
+            
+            // 응답 타입 확인
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json().then(data => {
+                    if (!response.ok) {
+                        throw new Error(data.message || '회원가입 중 오류가 발생했습니다.');
+                    }
+                    return data;
+                });
+            } else {
+                return response.text().then(text => {
+                    console.error('Non-JSON response:', text); // 디버깅용
+                    throw new Error('서버 오류가 발생했습니다.');
+                });
+            }
+        })
+        .then(data => {
+            console.log('Parsed response data:', data); // 디버깅용
+            
+            if (data.status === 'SUCCESS') {
+                Swal.fire({
+                    title: '성공!',
+                    text: '회원가입이 완료되었습니다.',
+                    icon: 'success'
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+            } else {
+                throw new Error(data.message || '회원가입 중 오류가 발생했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error details:', error); // 디버깅용
+            Swal.fire({
+                title: '오류',
+                text: error.message || '회원가입 중 오류가 발생했습니다.',
+                icon: 'error'
+            });
+        });
+    },
+
     init() {
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const signupForm = document.getElementById('signupForm');
+        const form = document.getElementById('signupForm');
+        if (form) {
+            form.addEventListener('submit', (e) => this.signup(e));
+            
+            // 이메일 유효성 검사
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.addEventListener('input', () => {
+                    const isEmailValid = this.validateEmail();
+                    const isPasswordValid = this.validatePassword();
+                    document.getElementById('submitBtn').disabled = !(isEmailValid && isPasswordValid);
+                });
+            }
 
-        if (signupForm) {
-            emailInput.addEventListener('input', () => this.validateForm());
-            passwordInput.addEventListener('input', () => this.validateForm());
-            confirmPasswordInput.addEventListener('input', () => this.validateForm());
-
-            signupForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                const formData = {
-                    userName: document.querySelector('input[name="userName"]').value,
-                    email: document.querySelector('input[name="email"]').value,
-                    password: document.querySelector('input[name="password"]').value
-                };
-
-                fetch('/api/users/signup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => commonFunctions.handleApiResponse(response, 
-                    () => {
-                        alert('회원가입이 완료되었습니다.');
-                        window.location.href = '/login';
-                    },
-                    '회원가입에 실패했습니다.'
-                ));
+            // 비밀번호 확인 유효성 검사
+            const passwordInputs = document.querySelectorAll('input[type="password"]');
+            passwordInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const isEmailValid = this.validateEmail();
+                    const isPasswordValid = this.validatePassword();
+                    document.getElementById('submitBtn').disabled = !(isEmailValid && isPasswordValid);
+                });
             });
         }
     }
