@@ -30,5 +30,21 @@
         ORDER BY 
             issued_dt DESC
     </select>
+
+    <select id="findByUserId" resultType="com.example.dto.api.ApiKeyDto$Response">
+        SELECT 
+            purpose,
+            api_key as apiKey,
+            issued_dt as issuedDt,
+            expires_dt as expiresDt,
+            use_yn as useYn
+        FROM 
+            tb_cm_api_key
+        WHERE 
+            user_id = #{userId}
+        ORDER BY 
+            issued_dt DESC
+    </select>
+    
     
 </mapper> 

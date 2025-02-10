@@ -19,4 +19,6 @@ public interface ApiKeyMapper {
     );
     
     List<ApiKeyDto.Response> findApiKeysByUserId(@Param("userId") Integer userId);
+
+    List<ApiKeyDto> findByUserId(@Param("userId") Integer userId);
 } 

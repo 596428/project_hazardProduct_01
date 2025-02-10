@@ -30,19 +30,12 @@
             <div class="file-upload">
                 <input type="file" id="excelFile" accept=".xlsx,.xls">
                 <input type="number" id="previewRows" value="10" min="1" max="100">
-                <button onclick="uploadFunctions.previewFile()">미리보기</button>
+                <button onclick="uploadFunctions.previewFile()" class="btn-preview">미리보기</button>
             </div>
         </div>
 
         <div class="preview-section" style="display: none;">
             <h2>미리보기</h2>
-            <div class="table-info">
-                <input type="text" id="tableName" placeholder="테이블 이름 입력">
-                <div id="columnDefinitions">
-                    <!-- 컬럼 정의는 JavaScript로 동적 생성 -->
-                </div>
-                <button onclick="uploadFunctions.addColumnDefinition()">컬럼 추가</button>
-            </div>
             
             <div class="data-range">
                 <label>데이터 범위:</label>
@@ -60,6 +53,18 @@
                         <!-- 데이터는 JavaScript로 동적 생성 -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- table-info 섹션을 별도의 section으로 분리 -->
+            <div class="table-info-section">
+                <h2>테이블 정의</h2>
+                <div class="table-info">
+                    <input type="text" id="tableName" placeholder="테이블 이름 입력">
+                    <div id="columnDefinitions">
+                        <!-- 컬럼 정의는 JavaScript로 동적 생성 -->
+                    </div>
+                    <button onclick="uploadFunctions.addColumnDefinition()" class="btn-add-column">컬럼 추가</button>
+                </div>
             </div>
 
             <button onclick="uploadFunctions.startImport()" class="btn-import">데이터 이관 시작</button>

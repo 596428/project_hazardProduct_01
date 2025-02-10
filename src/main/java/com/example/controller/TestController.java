@@ -8,6 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.dto.SearchCondition;
+import com.example.dto.user.UserDto;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.example.domain.User;
@@ -57,18 +59,19 @@ public class TestController {
     }
 
     @GetMapping("/test03")
-    public String test03(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String userEmail = auth.getName();
-        
-        User userInfo = userMapper.findByEmail(userEmail).orElseThrow();
-        System.out.println("User Email: " + userInfo.getEmail());
-        System.out.println("User Name: " + userInfo.getUserName());
-        System.out.println("User Role: " + userInfo.getRoleCd());
-        
-        model.addAttribute("user", userInfo);
-        
-        return "test03";
+    public String test03(Model model, Authentication authentication) {
+        if (authentication != null) {
+            UserDto userDto = (UserDto) authentication.getPrincipal();
+            String email = userDto.getEmail();
+            
+            User user = userMapper.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + email));
+            
+            model.addAttribute("user", user);
+            model.addAttribute("email", email);
+            return "test03";
+        }
+        return "redirect:/test01";
     }
 
     @GetMapping("/test04")
@@ -83,5 +86,12 @@ public class TestController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         model.addAttribute("auth", auth);
         return "test05";
+    }
+
+    @GetMapping("/test06")
+    public String test06(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("auth", auth);
+        return "test06";
     }
 } 

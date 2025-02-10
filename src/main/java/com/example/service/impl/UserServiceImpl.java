@@ -48,19 +48,25 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
-
+        
         // 로그인 성공 시 Spring Security Context에 인증 정보 설정
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRoleCd()));
         System.out.println("Setting authorities: " + authorities);  // 권한 설정 로그
         
+        // UserDto 정보를 포함하여 Authentication 객체 생성
+        UserDto userDto = new UserDto();
+        userDto.setUserId(user.getUserId());
+        userDto.setEmail(user.getEmail());
+        userDto.setUserName(user.getUserName());  // userName 추가
+        
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-            user.getEmail(),
+            userDto,
             null,
             authorities
         );
         
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        System.out.println("SecurityContext authentication set: " + SecurityContextHolder.getContext().getAuthentication());  // 인증 정보 설정 확인
+        System.out.println("SecurityContext authentication set: " + SecurityContextHolder.getContext().getAuthentication());
 
         userMapper.updateLastLoginTime(user.getUserId());
     }

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>API 테스트</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/script.js"></script>
+</head>
+<body>
+    <!-- 관리자 권한 체크 -->
+    <div sec:authorize="!hasAuthority('ROLE_01')">
+        <script>
+            window.location.href = '/test01';
+        </script>
+    </div>
+
+    <div class="header">
+        <h1>API 테스트</h1>
+        <div class="header-buttons">
+            <a href="/test01" class="btn btn-secondary">메인으로</a>
+            <button onclick="commonFunctions.logout()" class="btn btn-danger">로그아웃</button>
+        </div>
+    </div>
+
+    <div class="api-test-container">
+        <div class="api-section">
+            <h2>코드 조회 API 테스트</h2>
+            <div class="api-info">
+                <h3>API 정보</h3>
+                <p><strong>엔드포인트:</strong> POST /api/v1/code</p>
+            </div>
+            <div class="input-group">
+                <label>API 키:</label>
+                <input type="text" id="apiKey" placeholder="API 키를 입력하세요">
+            </div>
+            <div class="input-group">
+                <label>Request Body (JSON):</label>
+                <textarea id="requestBody" class="json-input" rows="5"></textarea>
+            </div>
+            <button onclick="apiTestFunctions.testCodeApi()" class="btn-test">테스트</button>
+            <div class="response-section">
+                <h3>응답 결과</h3>
+                <pre id="apiResponse"></pre>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>날짜 기반 조회 API 테스트</h2>
+            <div class="api-info">
+                <h3>API 정보</h3>
+                <p><strong>엔드포인트:</strong> POST /api/v1/date-search</p>
+                <p><strong>설명:</strong> 요청 문서 일시 입력 시, 입력 일시 부터 + 90일 데이터 조회<br>
+                    요청 문서 일시 미입력시, 금일 날짜 기준으로 -90일 데이터 조회</p>
+                <p><strong>요청 예시:</strong></p>
+                <pre class="code-example">
+{
+    "serviceCrtfcKey": "your-api-key-here",
+    "reqDocDt": "2024-02-10"    // 선택사항, YYYY-MM-DD 형식
+}</pre>
+            </div>
+            <div class="input-group">
+                <label>API 키:</label>
+                <input type="text" id="dateSearchApiKey" placeholder="API 키를 입력하세요">
+            </div>
+            <div class="input-group">
+                <label>Request Body (JSON):</label>
+                <textarea id="dateSearchRequestBody" class="json-input" rows="5"></textarea>
+            </div>
+            <button onclick="apiTestFunctions.testDateSearchApi()" class="btn-test">테스트</button>
+            <div class="response-section">
+                <h3>응답 결과</h3>
+                <pre id="dateSearchResponse"></pre>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>제품/업체명 기반 조회 API 테스트</h2>
+            <div class="api-info">
+                <h3>API 정보</h3>
+                <p><strong>엔드포인트:</strong> POST /api/v1/product-search</p>
+                <p><strong>설명:</strong> 제품명 또는 업체명으로 위해상품 정보를 검색합니다.<br>
+                    제품명과 업체명은 선택사항이며, 입력된 값이 포함된 결과를 검색합니다.</p>
+                <p><strong>요청 예시:</strong></p>
+                <pre class="code-example">
+{
+    "serviceCrtfcKey": "your-api-key-here",
+    "reqPrdctNm": "과자",        // 선택사항, 제품명
+    "reqBzentyNm": "식품"        // 선택사항, 업체명
+}</pre>
+            </div>
+            <div class="input-group">
+                <label>API 키:</label>
+                <input type="text" id="productSearchApiKey" placeholder="API 키를 입력하세요">
+            </div>
+            <div class="input-group">
+                <label>Request Body (JSON):</label>
+                <textarea id="productSearchRequestBody" class="json-input" rows="5"></textarea>
+            </div>
+            <button onclick="apiTestFunctions.testProductSearchApi()" class="btn-test">테스트</button>
+            <div class="response-section">
+                <h3>응답 결과</h3>
+                <pre id="productSearchResponse"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        apiTestFunctions.setupApiKeyHandlers();
+    });
+    </script>
+</body>
+</html> 

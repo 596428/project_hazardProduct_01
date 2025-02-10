@@ -9,10 +9,10 @@
 </head>
 <body>
     <div class="header">
-        <h1>마이페이지</h1>
+        <h1>사용자 관리</h1>
         <div class="header-buttons">
             <a href="/test01" class="btn btn-secondary">메인으로</a>
-            <button onclick="myPageFunctions.logout()" class="btn btn-danger">로그아웃</button>
+            <button onclick="commonFunctions.logout()" class="btn btn-danger">로그아웃</button>
         </div>
     </div>
 
@@ -20,11 +20,11 @@
         <h2>사용자 정보</h2>
         <div class="info-item">
             <label>이름:</label>
-            <span th:text="${user.userName}"></span>
+            <span th:text="${userName}"></span>
         </div>
         <div class="info-item">
             <label>이메일:</label>
-            <span th:text="${user.email}"></span>
+            <span th:text="${email}"></span>
         </div>
     </div>
 
@@ -47,10 +47,5 @@
         </table>
     </div>
 
-    <style>
-    .status-active { color: green; font-weight: bold; }
-    .status-expired { color: red; font-weight: bold; }
-    .status-pending { color: orange; font-weight: bold; }
-    </style>
 </body>
 </html> 

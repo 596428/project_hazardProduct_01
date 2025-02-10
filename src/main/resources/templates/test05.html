@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>API 테스트</title>
+    <title>테이블 이관</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/script.js"></script>
@@ -17,99 +17,544 @@
     </div>
 
     <div class="header">
-        <h1>API 테스트</h1>
+        <h1>테이블 이관</h1>
         <div class="header-buttons">
             <a href="/test01" class="btn btn-secondary">메인으로</a>
             <button onclick="commonFunctions.logout()" class="btn btn-danger">로그아웃</button>
         </div>
     </div>
 
-    <div class="api-test-container">
-        <div class="api-section">
-            <h2>코드 조회 API 테스트</h2>
-            <div class="api-info">
-                <h3>API 정보</h3>
-                <p><strong>엔드포인트:</strong> POST /api/v1/code</p>
-            </div>
-            <div class="input-group">
-                <label>API 키:</label>
-                <input type="text" id="apiKey" placeholder="API 키를 입력하세요">
-            </div>
-            <div class="input-group">
-                <label>Request Body (JSON):</label>
-                <textarea id="requestBody" class="json-input" rows="5"></textarea>
-            </div>
-            <button onclick="apiTestFunctions.testCodeApi()" class="btn-test">테스트</button>
-            <div class="response-section">
-                <h3>응답 결과</h3>
-                <pre id="apiResponse"></pre>
-            </div>
-        </div>
-
-        <div class="api-section">
-            <h2>날짜 기반 조회 API 테스트</h2>
-            <div class="api-info">
-                <h3>API 정보</h3>
-                <p><strong>엔드포인트:</strong> POST /api/v1/date-search</p>
-                <p><strong>설명:</strong> 요청 문서 일시 입력 시, 입력 일시 부터 + 90일 데이터 조회<br>
-                    요청 문서 일시 미입력시, 금일 날짜 기준으로 -90일 데이터 조회</p>
-                <p><strong>요청 예시:</strong></p>
-                <pre class="code-example">
-{
-    "serviceCrtfcKey": "your-api-key-here",
-    "reqDocDt": "2024-02-10"    // 선택사항, YYYY-MM-DD 형식
-}</pre>
-            </div>
-            <div class="input-group">
-                <label>API 키:</label>
-                <input type="text" id="dateSearchApiKey" placeholder="API 키를 입력하세요">
-            </div>
-            <div class="input-group">
-                <label>Request Body (JSON):</label>
-                <textarea id="dateSearchRequestBody" class="json-input" rows="5"></textarea>
-            </div>
-            <button onclick="apiTestFunctions.testDateSearchApi()" class="btn-test">테스트</button>
-            <div class="response-section">
-                <h3>응답 결과</h3>
-                <pre id="dateSearchResponse"></pre>
+    <div class="migration-container">
+        <!-- DB 연결 정보 섹션 -->
+        <div class="db-connection-section">
+            <h2>대상 DB 연결 정보</h2>
+            <div class="connection-form">
+                <div class="form-group">
+                    <label for="targetDbType">Database Type:</label>
+                    <select id="targetDbType" class="form-control">
+                        <option value="postgresql">PostgreSQL</option>
+                        <option value="mariadb">MariaDB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="targetHost">Host:</label>
+                    <input type="text" id="targetHost" class="form-control" placeholder="예: localhost">
+                </div>
+                <div class="form-group">
+                    <label for="targetPort">Port:</label>
+                    <input type="number" id="targetPort" class="form-control" placeholder="예: 3306">
+                </div>
+                <div class="form-group">
+                    <label for="targetDatabase">Database:</label>
+                    <input type="text" id="targetDatabase" class="form-control" placeholder="데이터베이스 이름">
+                </div>
+                <div class="form-group">
+                    <label for="targetUsername">Username:</label>
+                    <input type="text" id="targetUsername" class="form-control" placeholder="사용자 이름">
+                </div>
+                <div class="form-group">
+                    <label for="targetPassword">Password:</label>
+                    <input type="password" id="targetPassword" class="form-control" placeholder="비밀번호">
+                </div>
+                <div class="button-group">
+                    <button onclick="migrationFunctions.testConnection()" class="btn-test-connection">연결 테스트</button>
+                    <button onclick="migrationFunctions.startMigration()" class="btn-start-migration">데이터 이관</button>
+                </div>
             </div>
         </div>
 
-        <div class="api-section">
-            <h2>제품/업체명 기반 조회 API 테스트</h2>
-            <div class="api-info">
-                <h3>API 정보</h3>
-                <p><strong>엔드포인트:</strong> POST /api/v1/product-search</p>
-                <p><strong>설명:</strong> 제품명 또는 업체명으로 위해상품 정보를 검색합니다.<br>
-                    제품명과 업체명은 선택사항이며, 입력된 값이 포함된 결과를 검색합니다.</p>
-                <p><strong>요청 예시:</strong></p>
-                <pre class="code-example">
-{
-    "serviceCrtfcKey": "your-api-key-here",
-    "reqPrdctNm": "과자",        // 선택사항, 제품명
-    "reqBzentyNm": "식품"        // 선택사항, 업체명
-}</pre>
+        <!-- 테이블 섹션들을 감싸는 컨테이너 -->
+        <div class="tables-container">
+            <div class="tables-section">
+                <h2>테이블 목록</h2>
+                <div class="tables-list" id="tablesList">
+                    <!-- 테이블 목록이 여기에 동적으로 추가됨 -->
+                </div>
+                <div class="selected-tables">
+                    <h3>선택된 테이블</h3>
+                    <div id="selectedTablesList"></div>
+                </div>
             </div>
-            <div class="input-group">
-                <label>API 키:</label>
-                <input type="text" id="productSearchApiKey" placeholder="API 키를 입력하세요">
-            </div>
-            <div class="input-group">
-                <label>Request Body (JSON):</label>
-                <textarea id="productSearchRequestBody" class="json-input" rows="5"></textarea>
-            </div>
-            <button onclick="apiTestFunctions.testProductSearchApi()" class="btn-test">테스트</button>
-            <div class="response-section">
-                <h3>응답 결과</h3>
-                <pre id="productSearchResponse"></pre>
+
+            <div class="table-properties-section">
+                <h2>테이블 속성</h2>
+                <div class="table-properties" id="tableProperties">
+                    <div class="no-table-selected">
+                        테이블을 선택하세요
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        apiTestFunctions.setupApiKeyHandlers();
+    const migrationFunctions = {
+        selectedTables: new Set(),
+        tableRelations: {},
+
+        init: function() {
+            this.loadTables();
+            
+            // DB 타입 변경 이벤트 리스너 추가
+            document.getElementById('targetDbType').addEventListener('change', this.updateDefaultPort);
+            
+            // 초기 포트 번호 설정
+            this.updateDefaultPort();
+        },
+
+        loadTables: function() {
+            Promise.all([
+                fetch('/api/migration/tables'),
+                fetch('/api/migration/tables/relations')
+            ])
+            .then(([tablesResponse, relationsResponse]) => 
+                Promise.all([tablesResponse.json(), relationsResponse.json()])
+            )
+            .then(([tables, relations]) => {
+                console.log('Relations received:', relations);  // 디버깅을 위한 로그
+                this.tableRelations = relations;  // relations가 이미 원하는 형태로 오고 있음
+                
+                const tablesList = document.getElementById('tablesList');
+                tablesList.innerHTML = '';
+                
+                tables.forEach(tableName => {
+                    const tableDiv = document.createElement('div');
+                    tableDiv.className = 'table-item';
+                    tableDiv.innerHTML = `
+                        <div class="table-checkbox">
+                            <input type="checkbox" id="table-${tableName}" 
+                                   ${this.selectedTables.has(tableName) ? 'checked' : ''}>
+                            <label for="table-${tableName}">${tableName}</label>
+                        </div>
+                    `;
+                    
+                    // 체크박스 클릭 이벤트
+                    const checkbox = tableDiv.querySelector('input');
+                    checkbox.addEventListener('change', (e) => {
+                        e.stopPropagation();  // 상위로 이벤트 전파 방지
+                        this.handleTableSelection(tableName, e.target.checked);
+                    });
+                    
+                    // 테이블 클릭 시 속성 보기
+                    tableDiv.addEventListener('click', (e) => {
+                        if (e.target !== checkbox) {  // 체크박스 클릭이 아닐 때만
+                            this.showTableProperties(tableName);
+                        }
+                    });
+                    
+                    tablesList.appendChild(tableDiv);
+                });
+                
+                this.updateSelectedTablesList();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        },
+
+        handleTableSelection: function(tableName, isSelected) {
+            if (isSelected) {
+                this.selectedTables.add(tableName);
+                // 연관 테이블들도 자동 선택
+                if (this.tableRelations[tableName]) {
+                    this.tableRelations[tableName].forEach(relatedTable => {
+                        this.selectedTables.add(relatedTable);
+                        const relatedCheckbox = document.getElementById(`table-${relatedTable}`);
+                        if (relatedCheckbox) relatedCheckbox.checked = true;
+                    });
+                }
+            } else {
+                this.selectedTables.delete(tableName);
+            }
+            
+            this.updateSelectedTablesList();
+        },
+
+        updateSelectedTablesList: function() {
+            const selectedList = document.getElementById('selectedTablesList');
+            selectedList.innerHTML = '';
+            
+            this.selectedTables.forEach(tableName => {
+                const tableDiv = document.createElement('div');
+                tableDiv.className = 'selected-table-item';
+                tableDiv.textContent = tableName;
+                
+                // 연관 테이블 표시
+                if (this.tableRelations[tableName]) {
+                    const relatedDiv = document.createElement('div');
+                    relatedDiv.className = 'related-table';
+                    relatedDiv.textContent = `연관: ${this.tableRelations[tableName].join(', ')}`;
+                    tableDiv.appendChild(relatedDiv);
+                }
+                
+                selectedList.appendChild(tableDiv);
+            });
+        },
+
+        showTableProperties: function(tableName) {
+            // 선택된 테이블 하이라이트
+            document.querySelectorAll('.table-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            const propertiesDiv = document.getElementById('tableProperties');
+            propertiesDiv.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            // 컬럼 정보와 제약조건 정보를 동시에 가져옴
+            Promise.all([
+                fetch(`/api/migration/tables/${tableName}/columns`),
+                fetch(`/api/migration/tables/${tableName}/constraints`),
+                fetch(`/api/migration/tables/${tableName}/preview`)
+            ])
+            .then(([columnsResponse, constraintsResponse, previewResponse]) => 
+                Promise.all([columnsResponse.json(), constraintsResponse.json(), previewResponse.json()])
+            )
+            .then(([columns, constraints, preview]) => {
+                propertiesDiv.innerHTML = `
+                    <h3>${tableName}</h3>
+                    <div class="tab-container">
+                        <div class="tab-buttons">
+                            <button class="tab-button active" onclick="migrationFunctions.switchTab('columns')">컬럼 정보</button>
+                            <button class="tab-button" onclick="migrationFunctions.switchTab('preview')">데이터 미리보기</button>
+                        </div>
+                        
+                        <div id="columns-tab" class="tab-content active">
+                            <table class="column-info-table">
+                                <thead>
+                                    <tr>
+                                        <th>컬럼명</th>
+                                        <th>데이터타입</th>
+                                        <th>PK/FK</th>
+                                        <th>Not Null</th>
+                                        <th>Default</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${columns.map(col => `
+                                        <tr>
+                                            <td>${col.columnName || ''}</td>
+                                            <td>${col.dataType || ''}</td>
+                                            <td>${col.constraints || ''}</td>
+                                            <td>${col.nullable || ''}</td>
+                                            <td>${col.defaultValue || ''}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="preview-tab" class="tab-content">
+                            <table class="preview-table">
+                                <thead>
+                                    <tr>
+                                        ${columns.map(col => `<th>${col.columnName}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${preview.map(row => `
+                                        <tr>
+                                            ${columns.map(col => `<td>${row[col.columnName] || ''}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading table properties:', error);
+                propertiesDiv.innerHTML = '<div class="error">속성을 불러오는데 실패했습니다.</div>';
+            });
+        },
+
+        testConnection: function() {
+            const connectionInfo = {
+                targetDbType: document.getElementById('targetDbType').value,
+                targetHost: document.getElementById('targetHost').value,
+                targetPort: document.getElementById('targetPort').value,
+                targetDatabase: document.getElementById('targetDatabase').value,
+                targetUsername: document.getElementById('targetUsername').value,
+                targetPassword: document.getElementById('targetPassword').value
+            };
+
+            // 필수 입력 확인
+            if (!connectionInfo.targetHost || !connectionInfo.targetPort || !connectionInfo.targetDatabase || 
+                !connectionInfo.targetUsername || !connectionInfo.targetPassword) {
+                Swal.fire('오류', '모든 연결 정보를 입력해주세요.', 'error');
+                return;
+            }
+
+            // 연결 테스트 API 호출
+            fetch('/api/migration/test-connection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(connectionInfo)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('성공', '데이터베이스 연결에 성공했습니다.', 'success');
+                } else {
+                    Swal.fire('실패', data.message || '데이터베이스 연결에 실패했습니다.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error testing connection:', error);
+                Swal.fire('오류', '연결 테스트 중 오류가 발생했습니다.', 'error');
+            });
+        },
+
+        switchTab: function(tabName) {
+            // 모든 탭 컨텐츠와 버튼 비활성화
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // 선택된 탭 활성화
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+        },
+
+        startMigration: function() {
+            // 선택된 테이블이 없는 경우
+            if (this.selectedTables.size === 0) {
+                Swal.fire('오류', '이관할 테이블을 선택해주세요.', 'error');
+                return;
+            }
+
+            // 연결 정보 확인
+            const connectionInfo = {
+                targetDbType: document.getElementById('targetDbType').value,
+                targetHost: document.getElementById('targetHost').value,
+                targetPort: document.getElementById('targetPort').value,
+                targetDatabase: document.getElementById('targetDatabase').value,
+                targetUsername: document.getElementById('targetUsername').value,
+                targetPassword: document.getElementById('targetPassword').value,
+                selectedTables: Array.from(this.selectedTables)
+            };
+
+            // 필수 입력 확인
+            if (!connectionInfo.targetHost || !connectionInfo.targetPort || 
+                !connectionInfo.targetDatabase || !connectionInfo.targetUsername || 
+                !connectionInfo.targetPassword) {
+                Swal.fire('오류', '모든 연결 정보를 입력해주세요.', 'error');
+                return;
+            }
+
+            // 모든 선택된 테이블의 연관 테이블이 선택되었는지 확인
+            let missingTables = new Set();
+            this.selectedTables.forEach(tableName => {
+                if (this.tableRelations[tableName]) {
+                    this.tableRelations[tableName].forEach(relatedTable => {
+                        if (!this.selectedTables.has(relatedTable)) {
+                            missingTables.add(relatedTable);
+                        }
+                    });
+                }
+            });
+
+            if (missingTables.size > 0) {
+                Swal.fire({
+                    title: '연관 테이블 누락',
+                    html: `다음 연관 테이블이 선택되지 않았습니다:<br><br>` +
+                          `<strong>${Array.from(missingTables).join(', ')}</strong><br><br>` +
+                          `모든 연관 테이블을 함께 선택해주세요.`,
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            // 확인 대화상자 표시
+            Swal.fire({
+                title: '데이터 이관 확인',
+                html: `다음 테이블들을 이관하시겠습니까?<br><br>` +
+                      `<strong>${Array.from(this.selectedTables).join('<br>')}</strong>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '이관',
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 로딩 표시
+                    Swal.fire({
+                        title: '데이터 이관 중...',
+                        html: '이관이 완료될 때까지 기다려주세요.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // API 호출
+                    fetch('/api/migration/execute', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(connectionInfo)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: '이관 완료',
+                                html: `다음 테이블들이 성공적으로 이관되었습니다:<br><br>` +
+                                      `<strong>${data.migratedTables.join('<br>')}</strong>`,
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: '이관 실패',
+                                html: data.errorMessage || '데이터 이관 중 오류가 발생했습니다.',
+                                icon: 'error'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error during migration:', error);
+                        Swal.fire({
+                            title: '이관 실패',
+                            text: '데이터 이관 중 오류가 발생했습니다.',
+                            icon: 'error'
+                        });
+                    });
+                }
+            });
+        },
+
+        // DB 타입에 따른 포트 번호 자동 변경 함수 추가
+        updateDefaultPort: function() {
+            const dbType = document.getElementById('targetDbType').value;
+            const portInput = document.getElementById('targetPort');
+            
+            if (dbType === 'postgresql') {
+                portInput.value = '5432';
+            } else if (dbType === 'mariadb') {
+                portInput.value = '3306';
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        migrationFunctions.init();
     });
     </script>
+    <style>
+        .db-connection-section {
+            background: var(--bg-color, #f8f9fa);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: var(--text-color, #212529);
+        }
+    
+        /* 다크모드 스타일 */
+        @media (prefers-color-scheme: dark) {
+            .db-connection-section {
+                --bg-color: #2d3436;
+                --text-color: #f5f6fa;
+            }
+    
+            .form-control {
+                background-color: #353b48;
+                border-color: #576574;
+                color: #f5f6fa;
+            }
+    
+            .form-control::placeholder {
+                color: #a4b0be;
+            }
+    
+            select.form-control option {
+                background-color: #353b48;
+                color: #f5f6fa;
+            }
+    
+            .form-group label {
+                color: #dcdde1;
+            }
+    
+            .btn-test-connection {
+                background-color: #0984e3;
+            }
+    
+            .btn-test-connection:hover {
+                background-color: #0870c0;
+            }
+    
+            .btn-start-migration {
+                background-color: #00b894;
+            }
+    
+            .btn-start-migration:hover {
+                background-color: #00a381;
+            }
+        }
+    
+        /* 기존 스타일 유지 */
+        .connection-form {
+            display: grid;
+            gap: 15px;
+            max-width: 500px;
+        }
+    
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+    
+        .form-control {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+    
+        select.form-control {
+            cursor: pointer;
+        }
+    
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    
+        .btn-test-connection, .btn-start-migration {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+    
+        .btn-test-connection {
+            background-color: #17a2b8;
+            color: white;
+        }
+    
+        .btn-start-migration {
+            background-color: #28a745;
+            color: white;
+        }
+    
+        .btn-test-connection:hover {
+            background-color: #138496;
+        }
+    
+        .btn-start-migration:hover {
+            background-color: #218838;
+        }
+        </style>
 </body>
 </html> 

@@ -296,112 +296,97 @@ const test01Functions = {
 
 // Test03 (MyPage) functions
 const myPageFunctions = {
-    createNewKey() {
+    createNewKey: function() {
         Swal.fire({
             title: 'API 키 생성',
-            text: '새로운 API 키의 이름을 입력해주세요',
             input: 'text',
+            inputLabel: 'API 키 이름을 입력하세요',
+            inputPlaceholder: '예: My API Key',
             showCancelButton: true,
-            confirmButtonText: '확인',
+            confirmButtonText: '생성',
             cancelButtonText: '취소',
             inputValidator: (value) => {
                 if (!value) {
-                    return '이름을 입력해주세요!';
+                    return 'API 키 이름을 입력해주세요!';
                 }
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                const keyName = result.value;
-                
                 fetch('/api/keys/create', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        keyName: keyName
+                        keyName: result.value
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('API 키 생성에 실패했습니다.');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '성공',
-                            text: 'API 키 생성 요청이 완료되었습니다. 관리자 승인 후 사용 가능합니다.'
-                        }).then(() => {
-                            location.reload();
-                        });
+                        Swal.fire('성공', 'API 키가 생성되었습니다.', 'success');
+                        this.loadApiKeys();  // 목록 새로고침
                     } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '오류',
-                            text: 'API 키 생성 요청 중 오류가 발생했습니다.'
-                        });
+                        throw new Error(data.message || 'API 키 생성에 실패했습니다.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: '오류',
-                        text: '서버 통신 중 오류가 발생했습니다.'
-                    });
+                    Swal.fire('오류', error.message, 'error');
                 });
             }
         });
     },
 
-    loadApiKeys() {
-        // console.log('loadApiKeys function called');
+    loadApiKeys: function() {
         fetch('/api/keys/list')
             .then(response => {
-                // console.log('API Response received:', response);
-                return commonFunctions.handleApiResponse(response, 
-                    data => {
-                        // console.log('Frontend - Received data:', data);
-                        const tbody = document.querySelector('#apiKeysTable tbody');
-                        tbody.innerHTML = '';
-                        
-                        data.data.forEach(key => {
-                            // console.log('Frontend - Processing key:', key);
-                            const row = document.createElement('tr');
-                            
-                            row.innerHTML += `<td>${key.purpose || '-'}</td>`;
-                            row.innerHTML += `<td>${key.apiKey || '-'}</td>`;
-                            
-                            if (key.apiKey === 'PENDING') {
-                                row.innerHTML += `<td>-</td>`;
-                                row.innerHTML += `<td>-</td>`;
-                            } else {
-                                row.innerHTML += `<td>${commonFunctions.formatDate(key.issuedDt)}</td>`;
-                                row.innerHTML += `<td>${commonFunctions.formatDate(key.expiresDt)}</td>`;
-                            }
-                            
-                            let status;
-                            if (key.apiKey === 'PENDING') {
-                                status = '<span class="status-pending">처리중</span>';
-                            } else if (key.useYn === 'Y' && (!key.expiresDt || new Date(key.expiresDt) > new Date())) {
-                                status = '<span class="status-active">Active</span>';
-                            } else {
-                                status = '<span class="status-expired">Expired</span>';
-                            }
-                            row.innerHTML += `<td>${status}</td>`;
-                            
-                            tbody.appendChild(row);
-                        });
-                    },
-                    'API 키 목록을 불러오는데 실패했습니다.'
-                );
+                if (!response.ok) {
+                    throw new Error('API 키 목록을 불러오는데 실패했습니다.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const tbody = document.querySelector('#apiKeysTable tbody');
+                tbody.innerHTML = '';
+                
+                data.forEach(key => {
+                    // 상태 결정 로직
+                    let status = 'UNKNOWN';
+                    if (key.apiKey === 'PENDING') {
+                        status = 'PENDING';
+                    } else if (key.useYn === 'N') {
+                        status = 'EXPIRED';
+                    } else if (key.expiresDt && new Date(key.expiresDt) < new Date()) {
+                        status = 'EXPIRED';
+                    } else if (key.useYn === 'Y') {
+                        status = 'ACTIVE';
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${key.purpose || '-'}</td>
+                        <td>${key.apiKey || '-'}</td>
+                        <td>${key.issuedDt ? new Date(key.issuedDt).toLocaleDateString() : '-'}</td>
+                        <td>${key.expiresDt ? new Date(key.expiresDt).toLocaleDateString() : '-'}</td>
+                        <td><span class="status-${status.toLowerCase()}">${status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             })
             .catch(error => {
-                console.error('Fetch error:', error);
+                console.error('Error:', error);
+                Swal.fire('오류', error.message, 'error');
             });
     },
 
-    init() {
-        console.log('MyPage initialization started');
-        this.loadApiKeys();  // DOMContentLoaded 이벤트 리스너 제거
+    init: function() {
+        this.loadApiKeys();
     }
 };
 

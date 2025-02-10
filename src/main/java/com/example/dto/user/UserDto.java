@@ -1,8 +1,16 @@
 package com.example.dto.user;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class UserDto {
+    
+    private Integer userId;
+    private String email;
+    private String userName;
     
     @Data
     public static class Request {

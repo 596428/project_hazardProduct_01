@@ -21,7 +21,8 @@
             <!-- 권한 체크 - ROLE_01인 경우만 버튼 표시 -->
             <a href="/test02" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">관리페이지</a>
             <a href="/test04" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">업로드페이지</a>
-            <a href="/test05" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">API 테스트</a>
+            <a href="/test05" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">이관 페이지</a>
+            <a href="/test06" class="btn btn-secondary" sec:authorize="hasAuthority('ROLE_01')">API 테스트</a>
             <button onclick="logout()" class="btn btn-danger">로그아웃</button>
         </div>
     </div>

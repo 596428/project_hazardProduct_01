@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.MigrationMapper">
+    
+    <insert id="insertMigrationHistory">
+        INSERT INTO tb_cm_migration_history (
+            user_id,
+            target_host,
+            target_port,
+            target_database,
+            status,
+            error_message,
+            tables_migrated
+        ) VALUES (
+            #{userId},
+            #{targetHost},
+            #{targetPort},
+            #{targetDatabase},
+            #{status},
+            #{errorMessage},
+            ARRAY[
+            <foreach item="table" collection="tablesMigrated" separator=",">
+                #{table}
+            </foreach>
+            ]::varchar[]
+        )
+    </insert>
+
+    <select id="getMigrationHistory" resultType="com.example.dto.migration.MigrationDto$HistoryResponse">
+        SELECT 
+            migration_id,
+            user_id,
+            migration_dt,
+            target_host,
+            target_database,
+            status,
+            error_message,
+            tables_migrated
+        FROM 
+            tb_cm_migration_history
+        WHERE 
+            user_id = #{userId}
+        ORDER BY 
+            migration_dt DESC
+    </select>
+
+    <select id="getAllTables" resultType="string">
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public'
+        ORDER BY table_name
+    </select>
+
+    <select id="getTableColumns" resultType="com.example.dto.migration.ColumnInfoDto">
+        SELECT 
+            c.column_name as columnName,
+            CASE 
+                WHEN c.data_type = 'character varying' THEN 
+                    'varchar(' || c.character_maximum_length || ')'
+                WHEN c.data_type = 'character' THEN 
+                    'char(' || c.character_maximum_length || ')'
+                WHEN c.data_type = 'numeric' AND c.numeric_precision IS NOT NULL THEN
+                    'numeric(' || c.numeric_precision || 
+                    CASE WHEN c.numeric_scale IS NOT NULL 
+                        THEN ',' || c.numeric_scale 
+                        ELSE '' 
+                    END || ')'
+                ELSE c.data_type
+            END as dataType,
+            CASE 
+                WHEN pk.constraint_type = 'PRIMARY KEY' THEN 'PK'
+                WHEN fk.constraint_type = 'FOREIGN KEY' THEN 'FK'
+                ELSE ''
+            END as constraints,
+            CASE 
+                WHEN c.is_nullable = 'NO' THEN '[v]'
+                ELSE '[ ]'
+            END as nullable,
+            COALESCE(c.column_default, '') as defaultValue
+        FROM 
+            information_schema.columns c
+        LEFT JOIN (
+            SELECT 
+                tc.table_name,
+                kcu.column_name,
+                tc.constraint_type
+            FROM 
+                information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu 
+                ON tc.constraint_name = kcu.constraint_name
+            WHERE 
+                tc.constraint_type = 'PRIMARY KEY'
+        ) pk ON c.table_name = pk.table_name AND c.column_name = pk.column_name
+        LEFT JOIN (
+            SELECT 
+                tc.table_name,
+                kcu.column_name,
+                tc.constraint_type
+            FROM 
+                information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu 
+                ON tc.constraint_name = kcu.constraint_name
+            WHERE 
+                tc.constraint_type = 'FOREIGN KEY'
+        ) fk ON c.table_name = fk.table_name AND c.column_name = fk.column_name
+        WHERE 
+            c.table_name = #{tableName}
+        ORDER BY 
+            c.ordinal_position
+    </select>
+
+    <select id="getTableConstraints" resultType="string">
+        SELECT constraint_name 
+        FROM information_schema.table_constraints 
+        WHERE table_name = #{tableName}
+    </select>
+
+    <select id="getTablePreview" resultType="map">
+        SELECT *
+        FROM ${tableName}
+        LIMIT 5
+    </select>
+
+    <resultMap id="tableRelationsMap" type="java.util.HashMap">
+        <result property="key" column="table_name"/>
+        <result property="value" column="related_tables"/>
+    </resultMap>
+
+    <select id="getTableRelations" resultMap="tableRelationsMap">
+        WITH relation_data AS (
+            SELECT DISTINCT
+                tc.table_name,
+                ccu.table_name as referenced_table
+            FROM 
+                information_schema.table_constraints tc
+            JOIN 
+                information_schema.key_column_usage kcu
+                ON tc.constraint_name = kcu.constraint_name
+            JOIN 
+                information_schema.constraint_column_usage ccu
+                ON ccu.constraint_name = tc.constraint_name
+            WHERE 
+                tc.constraint_type = 'FOREIGN KEY'
+        )
+        SELECT 
+            table_name,
+            string_agg(referenced_table, ',') as related_tables
+        FROM 
+            relation_data
+        GROUP BY 
+            table_name;
+    </select>
+
+    <select id="getTableData" resultType="map">
+        SELECT *
+        FROM ${tableName}
+    </select>
+
+    <select id="getTableForeignKeys" resultType="com.example.dto.migration.ForeignKeyDto">
+        SELECT
+            tc.constraint_name as constraintName,
+            kcu.column_name as columnName,
+            ccu.table_name as referencedTable,
+            ccu.column_name as referencedColumn
+        FROM 
+            information_schema.table_constraints tc
+        JOIN 
+            information_schema.key_column_usage kcu
+            ON tc.constraint_name = kcu.constraint_name
+        JOIN 
+            information_schema.constraint_column_usage ccu
+            ON ccu.constraint_name = tc.constraint_name
+        WHERE 
+            tc.constraint_type = 'FOREIGN KEY'
+            AND tc.table_name = #{tableName}
+    </select>
+
+    <select id="getColumnType" resultType="string">
+        SELECT data_type
+        FROM information_schema.columns
+        WHERE table_name = #{tableName}
+        AND column_name = #{columnName}
+    </select>
+</mapper> 
